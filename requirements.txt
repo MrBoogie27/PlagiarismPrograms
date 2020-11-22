@@ -1,0 +1,3 @@
+sudo apt-get install libclang-dev llvm clang clang-tools            установка всех
+
+
