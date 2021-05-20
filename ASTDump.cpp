@@ -68,10 +68,6 @@ public:
 
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
         FullSourceLoc FullLocation = Context->getFullLoc(Declaration->getBeginLoc());
-        if (FullLocation.isValid())
-            llvm::outs() << "Found declaration at "
-                         << FullLocation.getSpellingLineNumber() << ":"
-                         << FullLocation.getSpellingColumnNumber() << "\n";
         return true;
     }
 };
