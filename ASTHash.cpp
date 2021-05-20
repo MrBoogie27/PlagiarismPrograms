@@ -26,12 +26,12 @@ private:
 
     long long pow(int number, size_t power) {
         if (power == 0)
-            return 1;
-        int halfPow = pow(number, power / 2);
+            return 1ll;
+        long long halfPow = pow(number, power / 2);
         if (power % 2 == 0)
             return (halfPow * halfPow) % MOD;
         else
-            return (number * halfPow * halfPow) % MOD;
+            return (((number * halfPow) % MOD) * halfPow) % MOD;
     }
 public:
 
@@ -65,7 +65,7 @@ public:
                 hash = (hash + pow(WEIGHT_CALLER, number_vertex)) % MOD;
                 hash = (hash + pow(static_cast<int>(call->getNumArgs()), number_vertex)) % MOD;
             } else {
-                hash = (hash + pow(WEIGHT_CALLER, WEIGHT_SOMETHING)) % MOD;
+                hash = (hash + pow(WEIGHT_SOMETHING, number_vertex)) % MOD;
             }
             ++number_vertex;
         }
