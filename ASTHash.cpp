@@ -44,6 +44,7 @@ public:
             hash = (hash + pow(WEIGHT_VAR_DECLARATION, number_vertex)) % MOD;
             ++number_vertex;
         }
+        return true;
     }
 
     virtual bool VisitFunctionDecl(FunctionDecl *func)
@@ -75,6 +76,10 @@ public:
         FullSourceLoc FullLocation = Context->getFullLoc(Declaration->getBeginLoc());
         return true;
     }
+
+    long long GetHash() const {
+        return hash;
+    }
 };
 
 class ASTConsumerHasher : public clang::ASTConsumer {
@@ -84,6 +89,7 @@ public:
 
     virtual void HandleTranslationUnit(clang::ASTContext &Context) {
         Visitor.TraverseDecl(Context.getTranslationUnitDecl());
+        std::cout << Visitor.GetHash() << std::endl;
     }
 private:
     VisitorHasher Visitor;
