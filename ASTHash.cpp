@@ -38,20 +38,35 @@ public:
 
     virtual bool VisitVarDecl(VarDecl *var)
     {
-        return true;
+        if (Context->getSourceManager().isInMainFile(var->getLocation())) //checks if the node is in the main = input file.
+        {
+            hash = (hash + pow(WEIGHT_VAR_DECLARATION, number_vertex)) % MOD;
+            ++number_vertex;
+        }
     }
 
     virtual bool VisitFunctionDecl(FunctionDecl *func)
     {
+        if (Context->getSourceManager().isInMainFile(func->getLocation())) //checks if the node is in the main = input file.
+        {
+            hash = (hash + pow(WEIGHT_FUNC_DECLARATION, number_vertex)) % MOD;
+            ++number_vertex;
+        }
         return true;
     }
 
     virtual bool VisitStmt(Stmt *st)
     {
+        if (Context->getSourceManager().isInMainFile(st->getBeginLoc())) //checks if the node is in the main = input file.
+        {
+            hash = (hash + pow(WEIGHT_CALLER, number_vertex)) % MOD;
+            ++number_vertex;
+        }
         return true;
     }
 
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
+        FullSourceLoc FullLocation = Context->getFullLoc(Declaration->getBeginLoc());
         return true;
     }
 };
