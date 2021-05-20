@@ -13,7 +13,7 @@
 using namespace clang;
 using namespace clang::tooling;
 
-class VisitorHasher : public RecursiveASTVisitor<ExampleVisitor> {
+class VisitorHasher : public RecursiveASTVisitor<VisitorHasher> {
 private:
     ASTContext *Context; // used for getting additional AST info
     long long hash = 7;
@@ -22,6 +22,7 @@ private:
     const int WEIGHT_VAR_DECLARATION = 13;
     const int WEIGHT_FUNC_DECLARATION = 17;
     const int WEIGHT_CALLER = 19;
+    const int WEIGHT_SOMETHING = 23;
 
     long long pow(int number, size_t power) {
         if (power == 0)
@@ -59,7 +60,12 @@ public:
     {
         if (Context->getSourceManager().isInMainFile(st->getBeginLoc())) //checks if the node is in the main = input file.
         {
-            hash = (hash + pow(WEIGHT_CALLER, number_vertex)) % MOD;
+            if (CallExpr *call = dyn_cast<CallExpr>(st)) {
+                hash = (hash + pow(WEIGHT_CALLER, number_vertex)) % MOD;
+                hash = (hash + pow(static_cast<int>(call->getNumArgs()), number_vertex)) % MOD;
+            } else {
+                hash = (hash + pow(WEIGHT_CALLER, WEIGHT_SOMETHING)) % MOD;
+            }
             ++number_vertex;
         }
         return true;
