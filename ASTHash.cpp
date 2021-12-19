@@ -97,9 +97,11 @@ public:
         return true;
     }
 
-    bool dataTraverseStmtPre(Stmt *S) {
-        ++height;
-        max_height = std::max(max_height, height);
+    bool dataTraverseStmtPre(Stmt *st) {
+        if (Context->getSourceManager().isInMainFile(st->getBeginLoc())) {
+            ++height;
+            max_height = std::max(max_height, height);
+        }
         return true;
     }
 
