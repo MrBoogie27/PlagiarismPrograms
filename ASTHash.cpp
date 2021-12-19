@@ -77,6 +77,10 @@ public:
         return true;
     }
 
+    bool shouldTraversePostOrder() const {
+        return true;
+    }
+
     long long GetHash() const {
         return hash;
     }
@@ -104,7 +108,7 @@ public:
     }
 };
 
-static llvm::cl::OptionCategory MyToolCategory("my-tool options");
+static llvm::cl::OptionCategory MyToolCategory("Additional options");
 
 int main(int argc, const char **argv) {
     CommonOptionsParser OptionsParser(argc, argv, MyToolCategory);
