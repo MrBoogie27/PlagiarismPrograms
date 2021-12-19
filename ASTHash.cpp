@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <unordered_map>
+#include <vector>
 #include "llvm-10/llvm/Support/raw_ostream.h"
 #include "clang/Basic/LangOptions.h"
 #include "clang/AST/ASTConsumer.h"
@@ -16,8 +18,10 @@ using namespace clang::tooling;
 class VisitorHasher : public RecursiveASTVisitor<VisitorHasher> {
 private:
     ASTContext *Context; // used for getting additional AST info
-    long long hash = 7;
-    size_t number_vertex = 0;
+    std::vector<int> all_states;
+    std::vector<long long> last_access;
+    size_t height = 0;
+    size_t max_height = 0;
     const int MOD = 1e9 + 7;
     const int WEIGHT_VAR_DECLARATION = 13;
     const int WEIGHT_FUNC_DECLARATION = 17;
@@ -33,41 +37,53 @@ private:
         else
             return (((number * halfPow) % MOD) * halfPow) % MOD;
     }
+
+    long long get_uniq_hash(int identifier) {
+        return pow(identifier, max_height - height + 1);
+    }
 public:
 
     explicit VisitorHasher(ASTContext *Context) : Context(Context) { }
 
-    virtual bool VisitVarDecl(VarDecl *var)
+    bool VisitVarDecl(VarDecl *var)
     {
         if (Context->getSourceManager().isInMainFile(var->getLocation())) //checks if the node is in the main = input file.
         {
-            hash = (hash + pow(WEIGHT_VAR_DECLARATION, number_vertex)) % MOD;
-            ++number_vertex;
+            last_access.push_back(get_uniq_hash(WEIGHT_VAR_DECLARATION));
         }
         return true;
     }
 
-    virtual bool VisitFunctionDecl(FunctionDecl *func)
+    bool VisitFunctionDecl(FunctionDecl *func)
     {
         if (Context->getSourceManager().isInMainFile(func->getLocation())) //checks if the node is in the main = input file.
         {
-            hash = (hash + pow(WEIGHT_FUNC_DECLARATION, number_vertex)) % MOD;
-            ++number_vertex;
+            last_access.push_back(get_uniq_hash(WEIGHT_FUNC_DECLARATION));
         }
         return true;
     }
 
-    virtual bool VisitStmt(Stmt *st)
+    bool VisitStmt(Stmt *st)
     {
         if (Context->getSourceManager().isInMainFile(st->getBeginLoc())) //checks if the node is in the main = input file.
         {
-            if (CallExpr *call = dyn_cast<CallExpr>(st)) {
-                hash = (hash + pow(WEIGHT_CALLER, number_vertex)) % MOD;
-                hash = (hash + pow(static_cast<int>(call->getNumArgs()), number_vertex)) % MOD;
-            } else {
-                hash = (hash + pow(WEIGHT_SOMETHING, number_vertex)) % MOD;
+            long long hash = 7;
+            for (int child_hash: last_access) {
+                hash = (hash + child_hash) % MOD;
             }
-            ++number_vertex;
+            last_access.clear();
+            if (CallExpr *call = dyn_cast<CallExpr>(st)) {
+                hash = (hash + get_uniq_hash(WEIGHT_CALLER)) % MOD;
+                hash = (hash + get_uniq_hash(static_cast<int>(call->getNumArgs()))) % MOD;
+            } else {
+                hash = (hash + get_uniq_hash(WEIGHT_SOMETHING)) % MOD;
+            }
+            all_states.push_back(hash);
+            last_access.push_back(hash);
+            --height;
+            if (!height) {
+                max_height = 0;
+            }
         }
         return true;
     }
@@ -81,8 +97,18 @@ public:
         return true;
     }
 
+    bool dataTraverseStmtPre(Stmt *S) {
+        ++height;
+        max_height = std::max(max_height, height);
+        return true;
+    }
+
     long long GetHash() const {
-        return hash;
+        return all_states.back();
+    }
+
+    std::vector<int> GetIdsAst() const {
+        return all_states;
     }
 };
 
@@ -94,6 +120,10 @@ public:
     virtual void HandleTranslationUnit(clang::ASTContext &Context) {
         Visitor.TraverseDecl(Context.getTranslationUnitDecl());
         std::cout << Visitor.GetHash() << std::endl;
+        for (int id: Visitor.GetIdsAst()) {
+            std::cout << id << " ";
+        }
+        std::cout << std::endl;
     }
 private:
     VisitorHasher Visitor;
