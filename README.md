@@ -36,3 +36,17 @@ cmake --build /mnt/d/MIPT/PlagiarismPrograms/cmake-build-debug --target hasher_A
 ```
 ### Run hasher with two file
 ```hasher_AST_tool Tests/example.cpp Tests/example_duplicate.cpp```
+
+## Python program
+before you need build Hasher tool
+### Update data in DB
+#### Update similarity in DB
+```./main.py writer_similarity --host <host> --password <password> -U <user> -db <db>```
+#### Update hashes in DB
+```./main.py writer_hashes --host <host> --password <password> -U <user> -db <db>```
+
+### Get local Data
+#### Get subtree hashes
+```./main.py hasher -f ./Tests/example.cpp```
+#### Get metric similarity of programs: [0, 1]
+```./main.py compare2AST -f ./Tests/example.cpp -s ./Tests/example_duplicate.cpp```
