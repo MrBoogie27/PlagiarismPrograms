@@ -17,6 +17,8 @@ include_directories(${CLANG_INCLUDE_DIRS})
 add_executable(print_AST_tool ASTDump.cpp)
 add_executable(print_AST_tool_C ASTDump-C.cpp)
 add_executable(hasher_AST_tool ASTHash.cpp)
+add_executable(bearTrap matcher.cpp)
 
 target_link_libraries(print_AST_tool PRIVATE clangTooling)
 target_link_libraries(hasher_AST_tool PRIVATE clangTooling)
+target_link_libraries(bearTrap PRIVATE clangTooling)
