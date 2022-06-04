@@ -5,6 +5,7 @@
 #include "Library/HeightCalc.h"
 #include "clang/Tooling/Tooling.h"
 #include "clang/Tooling/CommonOptionsParser.h"
+#include "../CommonLib/CalcHashes.h"
 
 using namespace clang;
 using namespace clang::tooling;
@@ -17,9 +18,13 @@ int main(int argc, const char **argv) {
                    OptionsParser.getSourcePathList());
 
     int result = Tool.run(newFrontendActionFactory<ASTFrontendCalcHeights>().get());
+    if (result) {
+        return result;
+    }
 
+    result = Tool.run(newFrontendActionFactory<ASTFrontendCalcHashes>().get());
 //    std::vector<std::unique_ptr<ASTUnit>> ASTs;
 //    Tool.buildASTs(ASTs);
 
-    return result;
+
 }

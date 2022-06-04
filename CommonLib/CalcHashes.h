@@ -33,7 +33,9 @@ public:
 public:
     explicit VisitorCalcHashes(ASTContext *Context)
         : Context(Context)
-    { }
+    {
+        ExpandPowPrimes();
+    }
 
     bool VisitVarDecl(VarDecl *var);
     bool VisitFunctionDecl(FunctionDecl *func);

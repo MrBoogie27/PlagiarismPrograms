@@ -4,6 +4,8 @@
 
 #include "CalcHashes.h"
 
+std::vector<std::vector<uint32_t> > VisitorCalcHashes::ps_pows;
+
 void VisitorCalcHashes::ExpandPowPrimes(size_t length) {
     if (ps_pows.empty()) {
         ps_pows.resize(Ps.size());
@@ -17,8 +19,8 @@ void VisitorCalcHashes::ExpandPowPrimes(size_t length) {
         ps_pows[index_p].resize(length);
         for (size_t index_element = max_size; index_element < length; index_element++) {
             if (index_element) {
-                uint64_t new_value = ps_pows[index_p][index_element - 1u] * VisitorCalcHashes::Ps[index_element];
-                ps_pows[index_p][index_element] = new_value % VisitorCalcHashes::MOD;
+                uint64_t new_value = ps_pows[index_p][index_element - 1u] * Ps[index_element];
+                ps_pows[index_p][index_element] = new_value % MOD;
             } else {
                 ps_pows[index_p][index_element] = 1u;
             }
@@ -35,11 +37,11 @@ uint32_t VisitorCalcHashes::GetPPower(size_t num_p, size_t power) {
 
 uint32_t VisitorCalcHashes::AddByModule(uint32_t left, uint32_t right) {
     uint64_t answer = left + right;
-    return answer % VisitorCalcHashes::MOD;
+    return answer % MOD;
 }
 uint32_t VisitorCalcHashes::MultiplyByModule(uint32_t left, uint32_t right) {
     uint64_t answer = left * right;
-    return answer % VisitorCalcHashes::MOD;
+    return answer % MOD;
 }
 
 uint32_t VisitorCalcHashes::HashFunction(std::vector<uint32_t> elems) {
@@ -67,7 +69,7 @@ bool VisitorCalcHashes::VisitVarDecl(VarDecl *var) {
         }
     }
 
-    children_id.push_back(VisitorCalcHashes::START_WEIGHT_DECLARATION + var->getKind());
+    children_id.push_back(START_WEIGHT_DECLARATION + var->getKind());
 
     std::uintptr_t id = reinterpret_cast<std::uintptr_t>(var);
     Hashes[id] = HashFunction(children_id);
@@ -86,10 +88,12 @@ bool VisitorCalcHashes::VisitFunctionDecl(FunctionDecl *func) {
             children_id.push_back(Hashes[temp_id]);
         }
     }
-    children_id.push_back(VisitorCalcHashes::START_WEIGHT_DECLARATION + func->getKind());
+    children_id.push_back(START_WEIGHT_DECLARATION + func->getKind());
 
     std::uintptr_t id = reinterpret_cast<std::uintptr_t>(func);
     Hashes[id] = HashFunction(children_id);
+
+    return true;
 }
 
 bool VisitorCalcHashes::VisitStmt(Stmt *st) {
@@ -115,10 +119,12 @@ bool VisitorCalcHashes::VisitStmt(Stmt *st) {
             children_id.push_back(Hashes[temp_id]);
         }
     }
-    children_id.push_back(VisitorCalcHashes::START_WEIGHT_SOMETHING + st->getStmtClass());
+    children_id.push_back(START_WEIGHT_SOMETHING + st->getStmtClass());
 
     std::uintptr_t id = reinterpret_cast<std::uintptr_t>(st);
     Hashes[id] = HashFunction(children_id);
+
+    return true;
 }
 
 bool VisitorCalcHashes::VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
@@ -128,7 +134,9 @@ bool VisitorCalcHashes::VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
 
     std::vector<uint32_t> children_id;
 
-    children_id.push_back(VisitorCalcHashes::START_WEIGHT_DECLARATION + Declaration->getKind());
+    children_id.push_back(START_WEIGHT_DECLARATION + Declaration->getKind());
+
+    return true;
 }
 
 void ASTConsumerCalcHashes::HandleTranslationUnit(clang::ASTContext &Context) {
