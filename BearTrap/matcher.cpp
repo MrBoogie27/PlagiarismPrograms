@@ -2,7 +2,7 @@
 // Created by mrboogie on 31.05.22.
 //
 
-#include "HeightCalc.h"
+#include "Library/HeightCalc.h"
 #include "clang/Tooling/Tooling.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 
