@@ -84,7 +84,7 @@ private:
     ExampleVisitor Visitor;
 };
 
-class PrintAllAST : public clang::ASTFrontendAction {
+class ASTFrontendCalcHeights : public clang::ASTFrontendAction {
 public:
     virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
             clang::CompilerInstance &Compiler, llvm::StringRef InFile) {
@@ -101,6 +101,6 @@ int main(int argc, const char **argv) {
                    OptionsParser.getSourcePathList());
 
     // run the Clang Tool, creating a new FrontendAction (explained below)
-    int result = Tool.run(newFrontendActionFactory<PrintAllAST>().get());
+    int result = Tool.run(newFrontendActionFactory<ASTFrontendCalcHeights>().get());
     return result;
 }

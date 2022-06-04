@@ -15,7 +15,7 @@
 using namespace clang;
 using namespace clang::tooling;
 
-class VisitorHasher : public RecursiveASTVisitor<VisitorHasher> {
+class VisitorCalcHeights : public RecursiveASTVisitor<VisitorCalcHeights> {
 private:
     ASTContext *Context; // used for getting additional AST info
     std::vector<int> all_states;
@@ -43,7 +43,7 @@ private:
     }
 public:
 
-    explicit VisitorHasher(ASTContext *Context) : Context(Context) { }
+    explicit VisitorCalcHeights(ASTContext *Context) : Context(Context) { }
 
     bool VisitVarDecl(VarDecl *var)
     {
@@ -114,9 +114,9 @@ public:
     }
 };
 
-class ASTConsumerHasher : public clang::ASTConsumer {
+class ASTConsumerCalcHeights : public clang::ASTConsumer {
 public:
-    explicit ASTConsumerHasher(ASTContext *Context)
+    explicit ASTConsumerCalcHeights(ASTContext *Context)
             : Visitor(Context) {}
 
     virtual void HandleTranslationUnit(clang::ASTContext &Context) {
@@ -128,15 +128,15 @@ public:
         std::cout << std::endl;
     }
 private:
-    VisitorHasher Visitor;
+    VisitorCalcHeights Visitor;
 };
 
-class PrintAllAST : public clang::ASTFrontendAction {
+class ASTFrontendCalcHeights : public clang::ASTFrontendAction {
 public:
     virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
             clang::CompilerInstance &Compiler, llvm::StringRef InFile) {
         return std::unique_ptr<clang::ASTConsumer>(
-                new ASTConsumerHasher(&Compiler.getASTContext()));
+                new ASTConsumerCalcHeights(&Compiler.getASTContext()));
     }
 };
 
@@ -147,6 +147,6 @@ int main(int argc, const char **argv) {
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
 
-    int result = Tool.run(newFrontendActionFactory<PrintAllAST>().get());
+    int result = Tool.run(newFrontendActionFactory<ASTFrontendCalcHeights>().get());
     return result;
 }
