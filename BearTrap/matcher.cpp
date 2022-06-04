@@ -2,7 +2,7 @@
 // Created by mrboogie on 31.05.22.
 //
 
-#include "BearTrap/HeightCalc.h"
+#include "HeightCalc.h"
 #include "clang/Tooling/Tooling.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 

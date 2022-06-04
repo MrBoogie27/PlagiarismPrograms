@@ -83,6 +83,6 @@ void ASTConsumerCalcHeights::HandleTranslationUnit(clang::ASTContext &Context) {
 
     Context.getTranslationUnitDecl()->dump();
     for (auto& [key, value]: Visitor.GetHeights()) {
-        std::cout << std::hex << key << " " << std::dec << value << std::endl;
+        std::cout << std::hex << key << " " << std::dec << value << "\n";
     }
 };
