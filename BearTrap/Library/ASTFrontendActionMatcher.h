@@ -10,6 +10,7 @@
 #include "HeightCalc.h"
 #include "../../CommonLib/CalcHashes.h"
 #include "GraphCalc.h"
+#include "BottomUpMatcher.h"
 
 using namespace clang;
 using namespace clang::tooling;
@@ -123,6 +124,11 @@ public:
     }
 
     Node2NodeMap MatchByDice() {
+        ASTContext& first_context = ASTs[0]->getASTContext();
+        ASTContext& second_context = ASTs[1]->getASTContext();
+        ASTConsumerButtomUpFirstMatcher consumerButtomUp(&first_context, &second_context, MatchedNodes);
+        consumerButtomUp.HandleTranslationUnit(first_context);
+
         return MatchedNodes;
     }
 
