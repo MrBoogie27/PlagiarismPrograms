@@ -67,21 +67,23 @@ class ASTConsumerCalcHashes : public clang::ASTConsumer {
 public:
     static std::map<std::string, PtrToUintMap> allHashes;
 public:
-    explicit ASTConsumerCalcHashes(ASTContext *Context, llvm::StringRef InFile)
-            : Visitor(Context)
-            , currentFile(InFile.data()) {}
+    explicit ASTConsumerCalcHashes(ASTContext *Context)
+            : Visitor(Context) {}
 
     virtual void HandleTranslationUnit(clang::ASTContext &Context);
+
+    PtrToUintMap GetHashes() const {
+        return Visitor.GetHashes();
+    }
 private:
     VisitorCalcHashes Visitor;
-    std::string currentFile;
 };
 
 class ASTFrontendCalcHashes : public clang::ASTFrontendAction {
 public:
     virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
             clang::CompilerInstance &Compiler, llvm::StringRef InFile) {
-        return std::make_unique<ASTConsumerCalcHashes>(&Compiler.getASTContext(), InFile);
+        return std::make_unique<ASTConsumerCalcHashes>(&Compiler.getASTContext());
     }
 
 private:

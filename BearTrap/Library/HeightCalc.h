@@ -48,6 +48,10 @@ public:
             : Visitor(Context) {}
 
     virtual void HandleTranslationUnit(clang::ASTContext &Context);
+
+    std::unordered_map<std::uintptr_t, uint32_t> GetHeights() const {
+        return Visitor.GetHeights();
+    }
 private:
     VisitorCalcHeights Visitor;
 };

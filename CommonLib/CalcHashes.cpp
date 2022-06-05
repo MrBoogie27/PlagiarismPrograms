@@ -143,8 +143,6 @@ bool VisitorCalcHashes::VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
 void ASTConsumerCalcHashes::HandleTranslationUnit(clang::ASTContext &Context) {
     Visitor.TraverseDecl(Context.getTranslationUnitDecl());
 
-    allHashes[currentFile] = Visitor.GetHashes();
-
     Context.getTranslationUnitDecl()->dump();
     llvm::outs().flush();
     for (auto& [key, value]: Visitor.GetHashes()) {

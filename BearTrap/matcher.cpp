@@ -7,6 +7,7 @@
 #include "clang/Tooling/Tooling.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "../CommonLib/CalcHashes.h"
+#include "Library/ASTFrontendActionMatcher.h"
 
 using namespace clang;
 using namespace clang::tooling;
@@ -18,20 +19,18 @@ int main(int argc, const char **argv) {
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
 
-    int result = Tool.run(newFrontendActionFactory<ASTFrontendCalcHeights>().get());
-    if (result) {
-        return result;
+    std::vector<std::unique_ptr<ASTUnit>> ASTs;
+    Tool.buildASTs(ASTs);
+
+    ASTFrontendActionMatcher matcher(ASTs);
+    auto matches = matcher.Match();
+
+    std::cout << "MATCH:\n";
+    std::cout << std::hex;
+    for(auto& [left, right]: matches) {
+        std::cout << left << " : " << right << std::endl;
     }
+    std::cout << std::dec;
 
-    auto frontendHashes = newFrontendActionFactory<ASTFrontendCalcHashes>();
-    result = Tool.run(frontendHashes.get());
-    if (result) {
-        return result;
-    }
-
-    result = Tool.run(newTopDownFrontendActionFactory(ASTConsumerCalcHashes::allHashes).get());
-//    std::vector<std::unique_ptr<ASTUnit>> ASTs;
-//    Tool.buildASTs(ASTs);
-
-    return result;
+    return 0;
 }

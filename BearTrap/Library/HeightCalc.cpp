@@ -81,10 +81,10 @@ bool VisitorCalcHeights::VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
 void ASTConsumerCalcHeights::HandleTranslationUnit(clang::ASTContext &Context) {
     Visitor.TraverseDecl(Context.getTranslationUnitDecl());
 
-    Context.getTranslationUnitDecl()->dump();
-    llvm::outs().flush();
-    for (auto& [key, value]: Visitor.GetHeights()) {
-        std::cout << std::hex << key << " " << std::dec << value << "\n";
-    }
-    std::cout.flush();
+//    Context.getTranslationUnitDecl()->dump();
+//    llvm::outs().flush();
+//    for (auto& [key, value]: Visitor.GetHeights()) {
+//        std::cout << std::hex << key << " " << std::dec << value << "\n";
+//    }
+//    std::cout.flush();
 };
