@@ -5,6 +5,7 @@
 #include "CalcHashes.h"
 
 std::vector<std::vector<uint32_t> > VisitorCalcHashes::ps_pows;
+std::map<std::string, PtrToUintMap> ASTConsumerCalcHashes::allHashes;
 
 void VisitorCalcHashes::ExpandPowPrimes(size_t length) {
     if (ps_pows.empty()) {
@@ -142,8 +143,12 @@ bool VisitorCalcHashes::VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
 void ASTConsumerCalcHashes::HandleTranslationUnit(clang::ASTContext &Context) {
     Visitor.TraverseDecl(Context.getTranslationUnitDecl());
 
+    allHashes[currentFile] = Visitor.GetHashes();
+
     Context.getTranslationUnitDecl()->dump();
+    llvm::outs().flush();
     for (auto& [key, value]: Visitor.GetHashes()) {
         std::cout << std::hex << key << " " << std::dec << value << "\n";
     }
+    std::cout.flush();
 }

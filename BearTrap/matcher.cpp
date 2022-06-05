@@ -3,6 +3,7 @@
 //
 
 #include "Library/HeightCalc.h"
+#include "Library/TopDownMatcher.h"
 #include "clang/Tooling/Tooling.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "../CommonLib/CalcHashes.h"
@@ -22,9 +23,15 @@ int main(int argc, const char **argv) {
         return result;
     }
 
-    result = Tool.run(newFrontendActionFactory<ASTFrontendCalcHashes>().get());
+    auto frontendHashes = newFrontendActionFactory<ASTFrontendCalcHashes>();
+    result = Tool.run(frontendHashes.get());
+    if (result) {
+        return result;
+    }
+
+    result = Tool.run(newTopDownFrontendActionFactory(ASTConsumerCalcHashes::allHashes).get());
 //    std::vector<std::unique_ptr<ASTUnit>> ASTs;
 //    Tool.buildASTs(ASTs);
 
-
+    return result;
 }
