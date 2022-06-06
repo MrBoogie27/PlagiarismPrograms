@@ -46,28 +46,17 @@ protected:
     void UpdateMatchDescendants(std::uintptr_t id, std::vector<std::uintptr_t> children);
 };
 
-class VisitorButtomUpFirstMatcher : public VisitorButtomUpMatcherBase {
-public:
-    VisitorButtomUpFirstMatcher(ASTContext *Context, ASTContext *Context2, Node2NodeMap& matchers)
-            : VisitorButtomUpMatcherBase(Context, matchers)
-            , Context2(Context)
-    {
-    }
-
-    bool VisitVarDeclExec(VarDecl *var) override;
-    bool VisitFunctionDeclExec(FunctionDecl *func) override;
-    bool VisitStmtExec(Stmt *st) override;
-    bool VisitCXXRecordDeclExec(CXXRecordDecl *Declaration) override;
-
-private:
-    ASTContext *Context2;
-};
-
 class VisitorButtomUpSecondMatcher : public VisitorButtomUpMatcherBase {
 public:
-    VisitorButtomUpSecondMatcher(ASTContext *Context, OneOfDeclStmt node, Node2NodeMap& matchers)
+    VisitorButtomUpSecondMatcher(ASTContext *Context,
+                                 OneOfDeclStmt node,
+                                 std::unordered_set<std::uintptr_t>&& node_child_match,
+                                 size_t countDesc,
+                                 Node2NodeMap& matchers)
             : VisitorButtomUpMatcherBase(Context, matchers)
             , OriginalNode(node)
+            , NodeChildMatch(std::move(node_child_match))
+            , NodeCountDesc(countDesc)
             , BestNode({0, 0})
     {
         switch (OriginalNode.index()) {
@@ -82,6 +71,7 @@ public:
         };
     }
 
+    bool VisitDecl(Decl *decl);
     bool VisitVarDeclExec(VarDecl *var) override;
     bool VisitFunctionDeclExec(FunctionDecl *func) override;
     bool VisitStmtExec(Stmt *st) override;
@@ -98,25 +88,22 @@ public:
 private:
     OneOfDeclStmt OriginalNode;
     std::uintptr_t OriginalPtrNode;
+    std::unordered_set<std::uintptr_t> NodeChildMatch;
+    size_t NodeCountDesc;
     std::pair<std::uintptr_t, double> BestNode;
-};
-
-class ASTConsumerButtomUpFirstMatcher : public clang::ASTConsumer {
-public:
-    explicit ASTConsumerButtomUpFirstMatcher(ASTContext *Context, ASTContext *Context2, Node2NodeMap& matchers)
-            : Visitor(Context, Context2, matchers) {}
-
-    virtual void HandleTranslationUnit(clang::ASTContext &Context) {
-        Visitor.TraverseDecl(Context.getTranslationUnitDecl());
-    }
 private:
-    VisitorButtomUpFirstMatcher Visitor;
+    double Dice(std::uintptr_t currentNode) const;
+    void UpdateBest(std::uintptr_t currentNode, double dice);
 };
 
 class ASTConsumerButtomUpSecondMatcher : public clang::ASTConsumer {
 public:
-    explicit ASTConsumerButtomUpSecondMatcher(ASTContext *Context, OneOfDeclStmt node, Node2NodeMap& matchers)
-            : Visitor(Context, node, matchers)
+    explicit ASTConsumerButtomUpSecondMatcher(ASTContext *Context,
+                                              OneOfDeclStmt node,
+                                              std::unordered_set<std::uintptr_t>&& node_child_match,
+                                              size_t countDesc,
+                                              Node2NodeMap& matchers)
+            : Visitor(Context, node, std::move(node_child_match), countDesc, matchers)
             , Matchers(matchers) {}
 
     virtual void HandleTranslationUnit(clang::ASTContext &Context) {
@@ -132,5 +119,54 @@ private:
     VisitorButtomUpSecondMatcher Visitor;
     Node2NodeMap& Matchers;
 };
+
+class VisitorButtomUpFirstMatcher : public VisitorButtomUpMatcherBase {
+public:
+    VisitorButtomUpFirstMatcher(ASTContext *Context, ASTContext *Context2, Node2NodeMap& matchers)
+            : VisitorButtomUpMatcherBase(Context, matchers)
+            , Context2(Context)
+    {
+    }
+
+    bool VisitVarDeclExec(VarDecl *var) override;
+    bool VisitFunctionDeclExec(FunctionDecl *func) override;
+    bool VisitStmtExec(Stmt *st) override;
+    bool VisitCXXRecordDeclExec(CXXRecordDecl *Declaration) override;
+
+private:
+    ASTContext *Context2;
+private:
+    std::unordered_set<std::uintptr_t> GetChildMatch(std::uintptr_t node);
+
+    template<class NodePtr>
+    bool VisitAllNode(NodePtr node){
+        std::uintptr_t id = reinterpret_cast<std::uintptr_t>(node);
+        if (Matchers.count(id)) {
+            return false;
+        }
+
+        ASTConsumerButtomUpSecondMatcher consumer(Context2,
+                                                  node,
+                                                  GetChildMatch(id),
+                                                  Descendants[id].size(),
+                                                  Matchers);
+
+        consumer.HandleTranslationUnit(*Context2);
+        return true;
+    }
+};
+
+class ASTConsumerButtomUpFirstMatcher : public clang::ASTConsumer {
+public:
+    explicit ASTConsumerButtomUpFirstMatcher(ASTContext *Context, ASTContext *Context2, Node2NodeMap& matchers)
+            : Visitor(Context, Context2, matchers) {}
+
+    virtual void HandleTranslationUnit(clang::ASTContext &Context) {
+        Visitor.TraverseDecl(Context.getTranslationUnitDecl());
+    }
+private:
+    VisitorButtomUpFirstMatcher Visitor;
+};
+
 
 #endif //PLAGIARISMPROGRAMS_BOTTOMUPMATCHER_H

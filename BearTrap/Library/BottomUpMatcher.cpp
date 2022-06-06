@@ -3,6 +3,8 @@
 //
 
 #include "BottomUpMatcher.h"
+#include "NodeCompares.h"
+
 // VisitorButtomUpMatcherBase
 bool VisitorButtomUpMatcherBase::VisitVarDecl(VarDecl *var) {
     if (!Context->getSourceManager().isInMainFile(var->getLocation())) {
@@ -77,20 +79,67 @@ void VisitorButtomUpMatcherBase::UpdateMatchDescendants(std::uintptr_t id, std::
 
 // VisitorButtomUpFirstMatcher
 
+std::unordered_set<std::uintptr_t> VisitorButtomUpFirstMatcher::GetChildMatch(std::uintptr_t node) {
+    std::unordered_set<std::uintptr_t> answer;
+    for (auto elem: Descendants[node]) {
+        if (Matchers.count(elem)) {
+            answer.insert(Matchers.at(elem));
+        }
+    }
+    return answer;
+}
+
 bool VisitorButtomUpFirstMatcher::VisitVarDeclExec(VarDecl *var) {
-    return true;
+    return VisitAllNode(var);
 }
 bool VisitorButtomUpFirstMatcher::VisitFunctionDeclExec(FunctionDecl *func){
-    return true;
+    return VisitAllNode(func);
 }
 bool VisitorButtomUpFirstMatcher::VisitStmtExec(Stmt *st){
-    return true;
+    return VisitAllNode(st);
 }
 bool VisitorButtomUpFirstMatcher::VisitCXXRecordDeclExec(CXXRecordDecl *Declaration){
-    return true;
+    return VisitAllNode(Declaration);
 }
 
 // VisitorButtomUpSecondMatcher
+
+double VisitorButtomUpSecondMatcher::Dice(std::uintptr_t currentNode) const {
+    const auto& currentDesc = Descendants.at(currentNode);
+
+    uint32_t countMatch = 0;
+    for (auto child: currentDesc) {
+        countMatch += NodeChildMatch.count(child);
+    }
+
+    return 2.0 * countMatch / (currentDesc.size() + NodeCountDesc);
+}
+
+void VisitorButtomUpSecondMatcher::UpdateBest(std::uintptr_t currentNode, double dice) {
+    if (dice > BestNode.second) {
+        BestNode = { currentNode, dice };
+    }
+}
+
+bool VisitorButtomUpSecondMatcher::VisitDecl(Decl *decl) {
+    if (OriginalNode.index() != 0) {
+        return true;
+    }
+    auto declNode = std::get<Decl*>(OriginalNode);
+    std::uintptr_t id = reinterpret_cast<std::uintptr_t>(decl);
+    bool nodeIsInternal = static_cast<bool>(NodeCountDesc);
+    bool currentIsInternal = Descendants[id].empty();
+    if (nodeIsInternal ^ currentIsInternal) {
+        return true;
+    }
+    double dice = Compare(declNode, decl);
+    if (nodeIsInternal) {
+        dice = (dice + Dice(id)) / 2.0;
+    }
+    UpdateBest(id, dice);
+
+    return true;
+}
 
 bool VisitorButtomUpSecondMatcher::VisitVarDeclExec(VarDecl *var) {
     return true;
@@ -99,8 +148,29 @@ bool VisitorButtomUpSecondMatcher::VisitFunctionDeclExec(FunctionDecl *func){
     return true;
 }
 bool VisitorButtomUpSecondMatcher::VisitStmtExec(Stmt *st){
+    if (OriginalNode.index() != 1) {
+        return true;
+    }
+    auto stmtNode = std::get<Stmt*>(OriginalNode);
+    if (stmtNode->getStmtClass() != st->getStmtClass()) {
+        return true;
+    }
+    std::uintptr_t id = reinterpret_cast<std::uintptr_t>(st);
+    bool nodeIsInternal = static_cast<bool>(NodeCountDesc);
+    bool currentIsInternal = Descendants[id].empty();
+    if (nodeIsInternal ^ currentIsInternal) {
+        return true;
+    }
+    double dice = Compare(stmtNode, st);
+    if (nodeIsInternal) {
+        dice = (dice + Dice(id)) / 2.0;
+    }
+    UpdateBest(id, dice);
+
     return true;
 }
 bool VisitorButtomUpSecondMatcher::VisitCXXRecordDeclExec(CXXRecordDecl *Declaration){
+    std::uintptr_t id = reinterpret_cast<std::uintptr_t>(Declaration);
+
     return true;
 }
