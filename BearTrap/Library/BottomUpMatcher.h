@@ -69,9 +69,12 @@ public:
             default:
                 assert(false);
         };
+        std::cout << "INDEX: " << OriginalNode.index() << std::endl;
+        std::cout << "SIZE match: " << NodeChildMatch.size() << std::endl;
+        std::cout << "SIZE child: " << NodeCountDesc << std::endl;
     }
 
-    bool VisitDecl(Decl *decl);
+    bool VisitDeclExec(Decl *decl);
     bool VisitVarDeclExec(VarDecl *var) override;
     bool VisitFunctionDeclExec(FunctionDecl *func) override;
     bool VisitStmtExec(Stmt *st) override;
@@ -124,7 +127,7 @@ class VisitorButtomUpFirstMatcher : public VisitorButtomUpMatcherBase {
 public:
     VisitorButtomUpFirstMatcher(ASTContext *Context, ASTContext *Context2, Node2NodeMap& matchers)
             : VisitorButtomUpMatcherBase(Context, matchers)
-            , Context2(Context)
+            , Context2(Context2)
     {
     }
 
@@ -142,7 +145,7 @@ private:
     bool VisitAllNode(NodePtr node){
         std::uintptr_t id = reinterpret_cast<std::uintptr_t>(node);
         if (Matchers.count(id)) {
-            return false;
+            return true;
         }
 
         ASTConsumerButtomUpSecondMatcher consumer(Context2,

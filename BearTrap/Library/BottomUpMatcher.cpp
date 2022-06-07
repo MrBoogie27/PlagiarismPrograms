@@ -8,7 +8,7 @@
 // VisitorButtomUpMatcherBase
 bool VisitorButtomUpMatcherBase::VisitVarDecl(VarDecl *var) {
     if (!Context->getSourceManager().isInMainFile(var->getLocation())) {
-        return false;
+        return true;
     }
 
     std::vector<std::uintptr_t> children_id;
@@ -24,7 +24,7 @@ bool VisitorButtomUpMatcherBase::VisitVarDecl(VarDecl *var) {
 
 bool VisitorButtomUpMatcherBase::VisitFunctionDecl(FunctionDecl *func) {
     if (!Context->getSourceManager().isInMainFile(func->getLocation())) {
-        return false;
+        return true;
     }
     std::vector<std::uintptr_t> children_id;
     if (Stmt* S = func->getBody()) {
@@ -34,12 +34,12 @@ bool VisitorButtomUpMatcherBase::VisitFunctionDecl(FunctionDecl *func) {
     std::uintptr_t id = reinterpret_cast<std::uintptr_t>(func);
     UpdateMatchDescendants(id, children_id);
 
-    return VisitFunctionDecl(func);
+    return VisitFunctionDeclExec(func);
 }
 
 bool VisitorButtomUpMatcherBase::VisitStmt(Stmt *st) {
     if (!Context->getSourceManager().isInMainFile(st->getBeginLoc())) {
-        return false;
+        return true;
     }
 
     std::vector<std::uintptr_t> children_id;
@@ -57,15 +57,15 @@ bool VisitorButtomUpMatcherBase::VisitStmt(Stmt *st) {
     std::uintptr_t id = reinterpret_cast<std::uintptr_t>(st);
     UpdateMatchDescendants(id, children_id);
 
-    return VisitStmt(st);
+    return VisitStmtExec(st);
 }
 
 bool VisitorButtomUpMatcherBase::VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
     if (!Context->getSourceManager().isInMainFile(Declaration->getLocation())) {
-        return false;
+        return true;
     }
     std::vector<std::uintptr_t> children_id;
-    return VisitCXXRecordDecl(Declaration);
+    return VisitCXXRecordDeclExec(Declaration);
 }
 
 void VisitorButtomUpMatcherBase::UpdateMatchDescendants(std::uintptr_t id, std::vector<std::uintptr_t> children) {
@@ -106,7 +106,7 @@ bool VisitorButtomUpFirstMatcher::VisitCXXRecordDeclExec(CXXRecordDecl *Declarat
 
 double VisitorButtomUpSecondMatcher::Dice(std::uintptr_t currentNode) const {
     const auto& currentDesc = Descendants.at(currentNode);
-
+    std::cout << "len Desc: " << currentDesc.size() << std::endl;
     uint32_t countMatch = 0;
     for (auto child: currentDesc) {
         countMatch += NodeChildMatch.count(child);
@@ -121,50 +121,62 @@ void VisitorButtomUpSecondMatcher::UpdateBest(std::uintptr_t currentNode, double
     }
 }
 
-bool VisitorButtomUpSecondMatcher::VisitDecl(Decl *decl) {
+bool VisitorButtomUpSecondMatcher::VisitDeclExec(Decl *decl) {
     if (OriginalNode.index() != 0) {
         return true;
     }
     auto declNode = std::get<Decl*>(OriginalNode);
-    std::uintptr_t id = reinterpret_cast<std::uintptr_t>(decl);
-    bool nodeIsInternal = static_cast<bool>(NodeCountDesc);
-    bool currentIsInternal = Descendants[id].empty();
-    if (nodeIsInternal ^ currentIsInternal) {
+    std::cout << "classes: " << declNode->getDeclKindName() << " " << decl->getDeclKindName() << std::endl;
+    if (declNode->getKind() != decl->getKind()) {
         return true;
     }
+    std::uintptr_t id = reinterpret_cast<std::uintptr_t>(decl);
+    bool nodeIsInternal = static_cast<bool>(NodeCountDesc);
+    bool currentIsInternal = !Descendants[id].empty();
+    std::cout << "is Leaf: " << nodeIsInternal << " " << currentIsInternal << std::endl;
+    if (nodeIsInternal != currentIsInternal) {
+        return true;
+    }
+    std::cout << "Compare two node: " << std::hex << reinterpret_cast<std::uintptr_t>(declNode) << " " << id << std::dec << std::endl;
     double dice = Compare(declNode, decl);
     if (nodeIsInternal) {
         dice = (dice + Dice(id)) / 2.0;
     }
+    std::cout << "Get Dice " << dice << " for VisitDecl " << std::hex << id << std::dec << std::endl;
     UpdateBest(id, dice);
 
     return true;
 }
 
 bool VisitorButtomUpSecondMatcher::VisitVarDeclExec(VarDecl *var) {
-    return true;
+    return VisitDeclExec(var);
 }
 bool VisitorButtomUpSecondMatcher::VisitFunctionDeclExec(FunctionDecl *func){
-    return true;
+    return VisitDeclExec(func);
 }
 bool VisitorButtomUpSecondMatcher::VisitStmtExec(Stmt *st){
     if (OriginalNode.index() != 1) {
         return true;
     }
     auto stmtNode = std::get<Stmt*>(OriginalNode);
+    std::cout << "classes: " << stmtNode->getStmtClassName() << " " << st->getStmtClassName() << std::endl;
     if (stmtNode->getStmtClass() != st->getStmtClass()) {
         return true;
     }
+    std::cout << "get class" << std::endl;
     std::uintptr_t id = reinterpret_cast<std::uintptr_t>(st);
     bool nodeIsInternal = static_cast<bool>(NodeCountDesc);
-    bool currentIsInternal = Descendants[id].empty();
-    if (nodeIsInternal ^ currentIsInternal) {
+    bool currentIsInternal = !Descendants[id].empty();
+    std::cout << "is Leaf: " << nodeIsInternal << " " << currentIsInternal << std::endl;
+    if (nodeIsInternal != currentIsInternal) {
         return true;
     }
+    std::cout << "Compare two node: " << std::hex << reinterpret_cast<std::uintptr_t>(stmtNode) << " " << id << std::dec << std::endl;
     double dice = Compare(stmtNode, st);
     if (nodeIsInternal) {
         dice = (dice + Dice(id)) / 2.0;
     }
+    std::cout << "Get Dice " << dice << " for VisitStmt " << std::hex << id << std::dec << std::endl;
     UpdateBest(id, dice);
 
     return true;
