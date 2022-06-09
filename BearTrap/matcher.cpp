@@ -38,5 +38,7 @@ int main(int argc, const char **argv) {
     ASTFrontendActionEditScript editScriptBuilder(ASTs, hashes, matches);
     double similarity = editScriptBuilder.GenerateEditScript();
 
+    std::cout << "SIMILARITY: " << similarity << std::endl;
+
     return 0;
 }

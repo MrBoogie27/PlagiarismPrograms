@@ -13,7 +13,7 @@ using namespace clang::tooling;
 
 using Node2NodeMap = std::unordered_map<std::uintptr_t, std::uintptr_t>;
 using PtrToUintMap = std::unordered_map<std::uintptr_t, uint32_t>;
-using ScriptStruct = std::vector<std::pair<EditModes, uint32_t> >;
+using ScriptStruct = std::vector<std::pair<EditModes, double> >;
 
 class EScriptSecondCalc : public RecursiveASTVisitor<EScriptSecondCalc> {
 private:
@@ -29,7 +29,7 @@ public:
             , Hash(Hash)
     { }
 
-    bool VisitDecl(Decl *var);
+    bool VisitDecl(Decl *decl);
     bool VisitStmt(Stmt *S);
 
     ScriptStruct GetEditScript() const {

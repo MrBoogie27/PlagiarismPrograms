@@ -22,7 +22,7 @@ using ASTUnitPtrs = std::vector<ASTUnitPtr>;
 using Node2NodeMap = std::unordered_map<std::uintptr_t, std::uintptr_t>;
 using PtrToUintMap = std::unordered_map<std::uintptr_t, uint32_t>;
 using Node2Nodes = std::unordered_map<std::uintptr_t, std::vector<std::uintptr_t> >;
-using ScriptStruct = std::vector<std::pair<EditModes, uint32_t> >;
+using ScriptStruct = std::vector<std::pair<EditModes, double> >;
 
 class ASTFrontendActionEditScript{
 public:
@@ -30,7 +30,6 @@ public:
                                          const std::vector<PtrToUintMap>& Hashes,
                                          const Node2NodeMap& MatchedNodes)
             : ASTs(ASTs)
-            , Count(ASTs.size())
             , MatchedNodes(MatchedNodes)
             , Hashes(Hashes)
             , Similarity(0.0) {
@@ -43,7 +42,6 @@ public:
 
 private:
     ASTUnitPtrs& ASTs;
-    size_t Count;
     const Node2NodeMap& MatchedNodes;
     const std::vector<PtrToUintMap>& Hashes;
     double Similarity;

@@ -23,7 +23,7 @@ void ASTFrontendActionEditScript::CaclSimilarity() {
     for (auto& [action, weight] : EditScript) {
         Similarity += weight;
     }
-    Similarity = Similarity / allCount;
+    Similarity = 1.0 - Similarity / allCount;
 }
 
 double ASTFrontendActionEditScript::GetLastSimilarity() const {

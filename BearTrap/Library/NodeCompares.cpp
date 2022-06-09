@@ -16,6 +16,8 @@ double Compare(Decl *first, Decl *second) {
             return Compare(static_cast<VarDecl*>(first), static_cast<VarDecl*>(second));
         case Decl::Function:
             return Compare(static_cast<FunctionDecl*>(first), static_cast<FunctionDecl*>(second));
+        case Decl::CXXRecord:
+            return Compare(static_cast<CXXRecordDecl*>(first), static_cast<CXXRecordDecl*>(second));
         default:
             return 1.0;
     }
