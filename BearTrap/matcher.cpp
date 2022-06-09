@@ -8,6 +8,7 @@
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "../CommonLib/CalcHashes.h"
 #include "Library/ASTFrontendActionMatcher.h"
+#include "Library/ASTFrontendActionEditScript.h"
 
 using namespace clang;
 using namespace clang::tooling;
@@ -31,6 +32,11 @@ int main(int argc, const char **argv) {
         std::cout << left << " : " << right << std::endl;
     }
     std::cout << std::dec;
+
+    auto attributes = matcher.GetASTAttribute();
+    std::vector<PtrToUintMap> hashes = {attributes[0].Hashes, attributes[1].Hashes};
+    ASTFrontendActionEditScript editScriptBuilder(ASTs, hashes, matches);
+    double similarity = editScriptBuilder.GenerateEditScript();
 
     return 0;
 }
