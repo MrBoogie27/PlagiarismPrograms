@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(LLVM_LINK_COMPONENTS support)
 
 add_definitions(${LLVM_DEFINITIONS})
+add_definitions(-fPIC)
 
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${CLANG_INCLUDE_DIRS})

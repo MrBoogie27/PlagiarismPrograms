@@ -46,6 +46,7 @@ private:
     const std::vector<PtrToUintMap>& Hashes;
     double Similarity;
     ScriptStruct EditScript;
+    static constexpr double EPS = 1e-12;
 private:
     // Add, update, move
     void ProcessFirstTree();

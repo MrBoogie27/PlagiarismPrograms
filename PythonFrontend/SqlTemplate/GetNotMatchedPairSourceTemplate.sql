@@ -7,5 +7,5 @@ FROM
         INNER JOIN
     runs as runs_2
     ON matches.second_runs_id = runs_2.id
-WHERE matches.{} is NULL and matches.first_runs_id != matches.second_runs_id
-LIMIT 10000
+WHERE matches.{} is NULL
+LIMIT 1000

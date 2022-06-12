@@ -6,7 +6,6 @@
 #include "EScriptFirstCalc.h"
 #include "EScriptSecondCalc.h"
 
-
 double ASTFrontendActionEditScript::GenerateEditScript() {
     EditScript.clear();
     Similarity = 0.0;
@@ -23,7 +22,10 @@ void ASTFrontendActionEditScript::CaclSimilarity() {
     for (auto& [action, weight] : EditScript) {
         Similarity += weight;
     }
-    Similarity = 1.0 - Similarity / allCount;
+    if (allCount) {
+        Similarity = 1.0 - Similarity / allCount;
+    }
+    assert(Similarity + EPS >= 0.0 && Similarity <= 1.0 + EPS);
 }
 
 double ASTFrontendActionEditScript::GetLastSimilarity() const {

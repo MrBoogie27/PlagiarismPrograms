@@ -131,7 +131,7 @@ def update_bear_trap(cursor, update_data, args):
                               sim_info['fst_id'],
                               sim_info['snd_id'])
                        )
-        print("updated {}".format(sim_info))
+        # print("updated {}".format(sim_info))
 
 def writer_bear_trap(args):
     update_data = []
@@ -141,7 +141,14 @@ def writer_bear_trap(args):
             stmt = sql.SQL(sql_template).format(
                 sql.Identifier(args.field)
             )
-            cursor.execute(stmt)
-            for row in cursor:
-                get_bear_trap_similarity(row, args.binary_name, update_data)
-            update_bear_trap(cursor, update_data, args)
+            i = 0
+            while True:
+                cursor.execute(stmt)
+                if cursor.rowcount == 0:
+                    break
+                print("Run iteration number {} for {} rows".format(i, cursor.rowcount))
+                for row in cursor:
+                    get_bear_trap_similarity(row, args.binary_name, update_data)
+                update_bear_trap(cursor, update_data, args)
+                print("Rows updated")
+                i += 1
