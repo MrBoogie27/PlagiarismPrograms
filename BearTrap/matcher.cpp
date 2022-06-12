@@ -2,16 +2,15 @@
 // Created by mrboogie on 31.05.22.
 //
 
-#include "Library/HeightCalc.h"
 #include "Library/TopDownMatcher.h"
 #include "clang/Tooling/Tooling.h"
 #include "clang/Tooling/CommonOptionsParser.h"
-#include "../CommonLib/CalcHashes.h"
 #include "Library/ASTFrontendActionMatcher.h"
 #include "Library/ASTFrontendActionEditScript.h"
 
 using namespace clang;
 using namespace clang::tooling;
+using namespace BearTrap;
 
 static llvm::cl::OptionCategory MyToolCategory("Additional options");
 

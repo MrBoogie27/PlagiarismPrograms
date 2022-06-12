@@ -6,6 +6,8 @@
 #include "EScriptFirstCalc.h"
 #include "EScriptSecondCalc.h"
 
+using namespace BearTrap;
+
 double ASTFrontendActionEditScript::GenerateEditScript() {
     EditScript.clear();
     Similarity = 0.0;

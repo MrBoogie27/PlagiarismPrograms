@@ -4,6 +4,8 @@
 
 #include "TopDownMatcher.h"
 
+using namespace BearTrap;
+
 bool VisitorTopDownMatcher::VisitVarDecl(VarDecl *var) {
     std::uintptr_t id = reinterpret_cast<std::uintptr_t>(var);
 
@@ -40,8 +42,8 @@ void ASTConsumerTopDownMatcher::HandleTranslationUnit(clang::ASTContext &Context
     Visitor.TraverseDecl(Context.getTranslationUnitDecl());
 }
 
-std::unique_ptr<FrontendActionFactory> newTopDownFrontendActionFactory(const std::map<std::string, PtrToUintMap>& Hashes) {
-    class TopDownFrontendActionFactory : public FrontendActionFactory {
+std::unique_ptr<tooling::FrontendActionFactory> newTopDownFrontendActionFactory(const std::map<std::string, PtrToUintMap>& Hashes) {
+    class TopDownFrontendActionFactory : public tooling::FrontendActionFactory {
     public:
         explicit TopDownFrontendActionFactory(const std::map<std::string, PtrToUintMap>& Hashes)
                 : Hashes(Hashes) {
@@ -54,6 +56,6 @@ std::unique_ptr<FrontendActionFactory> newTopDownFrontendActionFactory(const std
         const std::map<std::string, PtrToUintMap>& Hashes;
     };
 
-    return std::unique_ptr<FrontendActionFactory>(
+    return std::unique_ptr<tooling::FrontendActionFactory>(
             new TopDownFrontendActionFactory(Hashes));
 }

@@ -4,6 +4,8 @@
 
 #include "GraphCalc.h"
 
+using namespace BearTrap;
+
 bool VisitorCalcGraph::VisitVarDecl(VarDecl *var)
 {
     if (!Context->getSourceManager().isInMainFile(var->getLocation())) {

@@ -5,6 +5,8 @@
 #include "EScriptFirstCalc.h"
 #include "NodeCompares.h"
 
+using namespace BearTrap;
+
 bool EScriptFirstCalc::VisitDecl(Decl *decl)
 {
     if (!Context->getSourceManager().isInMainFile(decl->getLocation())) {

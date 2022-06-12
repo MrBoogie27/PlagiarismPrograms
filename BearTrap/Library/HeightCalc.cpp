@@ -4,6 +4,8 @@
 
 #include "HeightCalc.h"
 
+using namespace BearTrap;
+
 bool VisitorCalcHeights::VisitVarDecl(VarDecl *var)
 {
     if (!Context->getSourceManager().isInMainFile(var->getLocation())) //checks if the node is in the main = input file.

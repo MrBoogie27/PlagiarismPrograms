@@ -16,12 +16,10 @@
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendAction.h"
-#include "clang/Tooling/Tooling.h"
-#include "clang/Tooling/CommonOptionsParser.h"
 
 using namespace clang;
-using namespace clang::tooling;
 using PtrToUintMap = std::unordered_map<std::uintptr_t, uint32_t>;
+
 
 class VisitorCalcHashes : public RecursiveASTVisitor<VisitorCalcHashes> {
 public:
@@ -37,10 +35,10 @@ public:
         ExpandPowPrimes();
     }
 
-    bool VisitVarDecl(VarDecl *var);
-    bool VisitFunctionDecl(FunctionDecl *func);
-    bool VisitStmt(Stmt *st);
-    bool VisitCXXRecordDecl(CXXRecordDecl *Declaration);
+#define VISIT(CLASS)                               \
+  bool Visit##CLASS(CLASS *node);
+#include "VisitNodes.inc"
+#undef VISIT
 
     bool shouldTraversePostOrder() const {
         return true;
@@ -79,15 +77,15 @@ private:
     VisitorCalcHashes Visitor;
 };
 
-class ASTFrontendCalcHashes : public clang::ASTFrontendAction {
+class ASTFrontendCalcHashes : public ASTFrontendAction {
 public:
-    virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
-            clang::CompilerInstance &Compiler, llvm::StringRef InFile) {
+    virtual std::unique_ptr<ASTConsumer> CreateASTConsumer(
+            CompilerInstance &Compiler, llvm::StringRef InFile) {
         return std::make_unique<ASTConsumerCalcHashes>(&Compiler.getASTContext());
     }
 
 private:
-    std::map<llvm::StringRef, std::unique_ptr<clang::ASTConsumer>> Consumers;
+    std::map<llvm::StringRef, std::unique_ptr<ASTConsumer>> Consumers;
 };
 
 #endif //PLAGIARISMPROGRAMS_CALCHASHES_H

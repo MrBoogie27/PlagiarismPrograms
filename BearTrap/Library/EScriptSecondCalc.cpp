@@ -4,6 +4,8 @@
 
 #include "EScriptSecondCalc.h"
 
+using namespace BearTrap;
+
 bool EScriptSecondCalc::VisitDecl(Decl *decl)
 {
     if (!Context->getSourceManager().isInMainFile(decl->getLocation())) {

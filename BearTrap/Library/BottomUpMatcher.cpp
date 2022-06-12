@@ -5,6 +5,8 @@
 #include "BottomUpMatcher.h"
 #include "NodeCompares.h"
 
+using namespace BearTrap;
+
 // VisitorButtomUpMatcherBase
 bool VisitorButtomUpMatcherBase::VisitVarDecl(VarDecl *var) {
     if (!Context->getSourceManager().isInMainFile(var->getLocation())) {
