@@ -1,4 +1,5 @@
 sudo apt-get install libclang-dev llvm clang clang-tools сmake           установка всех
 pip install psycopg2-binary                     postgre для python
 
+use llvm-10
 

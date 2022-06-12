@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  bear_trap:
+    build:
+      context: ../
+      dockerfile: ./Docker/Dockerfile
+    container_name: cron-bear-trap
+    network_mode: "host"

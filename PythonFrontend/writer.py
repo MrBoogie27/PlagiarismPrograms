@@ -119,7 +119,8 @@ def get_bear_trap_similarity(row, binary_path, update_data):
                     }
                 )
             except Exception as e:
-                print('error for {}'.format(row[0]))
+                print(e)
+                print('error for {}'.format(row[0], row[1]))
 
 def update_bear_trap(cursor, update_data, args):
     sql_command = open(args.sql_update, mode='r').read()
