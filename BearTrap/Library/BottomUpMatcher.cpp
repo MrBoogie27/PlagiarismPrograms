@@ -106,7 +106,7 @@ bool VisitorButtomUpFirstMatcher::VisitCXXRecordDeclExec(CXXRecordDecl *Declarat
 
 double VisitorButtomUpSecondMatcher::Dice(std::uintptr_t currentNode) const {
     const auto& currentDesc = Descendants.at(currentNode);
-    std::cout << "len Desc: " << currentDesc.size() << std::endl;
+    // std::cout << "len Desc: " << currentDesc.size() << std::endl;
     uint32_t countMatch = 0;
     for (auto child: currentDesc) {
         countMatch += NodeChildMatch.count(child);
@@ -126,23 +126,23 @@ bool VisitorButtomUpSecondMatcher::VisitDeclExec(Decl *decl) {
         return true;
     }
     auto declNode = std::get<Decl*>(OriginalNode);
-    std::cout << "classes: " << declNode->getDeclKindName() << " " << decl->getDeclKindName() << std::endl;
+    // std::cout << "classes: " << declNode->getDeclKindName() << " " << decl->getDeclKindName() << std::endl;
     if (declNode->getKind() != decl->getKind()) {
         return true;
     }
     std::uintptr_t id = reinterpret_cast<std::uintptr_t>(decl);
     bool nodeIsInternal = static_cast<bool>(NodeCountDesc);
     bool currentIsInternal = !Descendants[id].empty();
-    std::cout << "is Leaf: " << nodeIsInternal << " " << currentIsInternal << std::endl;
+    // std::cout << "is Leaf: " << nodeIsInternal << " " << currentIsInternal << std::endl;
     if (nodeIsInternal != currentIsInternal) {
         return true;
     }
-    std::cout << "Compare two node: " << std::hex << reinterpret_cast<std::uintptr_t>(declNode) << " " << id << std::dec << std::endl;
+    // std::cout << "Compare two node: " << std::hex << reinterpret_cast<std::uintptr_t>(declNode) << " " << id << std::dec << std::endl;
     double dice = Compare(declNode, decl);
     if (nodeIsInternal) {
         dice = (dice + Dice(id)) / 2.0;
     }
-    std::cout << "Get Dice " << dice << " for VisitDecl " << std::hex << id << std::dec << std::endl;
+    // std::cout << "Get Dice " << dice << " for VisitDecl " << std::hex << id << std::dec << std::endl;
     UpdateBest(id, dice);
 
     return true;
@@ -159,24 +159,24 @@ bool VisitorButtomUpSecondMatcher::VisitStmtExec(Stmt *st){
         return true;
     }
     auto stmtNode = std::get<Stmt*>(OriginalNode);
-    std::cout << "classes: " << stmtNode->getStmtClassName() << " " << st->getStmtClassName() << std::endl;
+    // std::cout << "classes: " << stmtNode->getStmtClassName() << " " << st->getStmtClassName() << std::endl;
     if (stmtNode->getStmtClass() != st->getStmtClass()) {
         return true;
     }
-    std::cout << "get class" << std::endl;
+    // std::cout << "get class" << std::endl;
     std::uintptr_t id = reinterpret_cast<std::uintptr_t>(st);
     bool nodeIsInternal = static_cast<bool>(NodeCountDesc);
     bool currentIsInternal = !Descendants[id].empty();
-    std::cout << "is Leaf: " << nodeIsInternal << " " << currentIsInternal << std::endl;
+    // std::cout << "is Leaf: " << nodeIsInternal << " " << currentIsInternal << std::endl;
     if (nodeIsInternal != currentIsInternal) {
         return true;
     }
-    std::cout << "Compare two node: " << std::hex << reinterpret_cast<std::uintptr_t>(stmtNode) << " " << id << std::dec << std::endl;
+    // std::cout << "Compare two node: " << std::hex << reinterpret_cast<std::uintptr_t>(stmtNode) << " " << id << std::dec << std::endl;
     double dice = Compare(stmtNode, st);
     if (nodeIsInternal) {
         dice = (dice + Dice(id)) / 2.0;
     }
-    std::cout << "Get Dice " << dice << " for VisitStmt " << std::hex << id << std::dec << std::endl;
+    // std::cout << "Get Dice " << dice << " for VisitStmt " << std::hex << id << std::dec << std::endl;
     UpdateBest(id, dice);
 
     return true;

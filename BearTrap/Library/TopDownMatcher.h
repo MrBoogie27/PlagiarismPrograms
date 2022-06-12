@@ -71,9 +71,9 @@ public:
         llvm::outs() << "current: " << InFile << "\n";
         llvm::outs().flush();
         if (Hashes.count(InFile)) {
-            std::cout << "File in map" << std::endl;
+            // std::cout << "File in map" << std::endl;
         } else {
-            std::cout << "File not in map" << std::endl;
+            // std::cout << "File not in map" << std::endl;
         }
 
         return std::unique_ptr<clang::ASTConsumer>(

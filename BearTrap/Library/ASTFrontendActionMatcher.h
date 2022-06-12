@@ -67,7 +67,7 @@ public:
             uint32_t first_height = Attributes[0].Heights[first_queue[0]];
             uint32_t second_height = Attributes[1].Heights[second_queue[0]];
 
-//            std::cout << "HEIGHTS " << first_height << " with " << second_height << std::endl;
+            // std::cout << "HEIGHTS " << first_height << " with " << second_height << std::endl;
 
             if (second_height > first_height) {
                 first_queue = GetChilds(first_queue, 0);
@@ -93,10 +93,10 @@ public:
                 std::uintptr_t snd_el = second_queue[snd_index];
                 uint32_t snd_hash = Attributes[1].Hashes[snd_el];
 
-//                std::cout << "Compare " << std::hex << fst_el << " with " << snd_el << std::dec << std::endl;
+                // std::cout << "Compare " << std::hex << fst_el << " with " << snd_el << std::dec << std::endl;
 
                 if (fst_hash == snd_hash) {
-//                    std::cout << "RecusiveMatch " << std::hex << fst_el << " with " << snd_el << std::dec << std::endl;
+                    // std::cout << "RecusiveMatch " << std::hex << fst_el << " with " << snd_el << std::dec << std::endl;
                     RecusiveMatch(fst_el, snd_el);
                     fst_index++;
                     snd_index++;
@@ -120,7 +120,7 @@ public:
             std::swap(second_queue, next_second_queue);
         }
 
-        std::cout << "End Match by hash" << std::endl;
+        // std::cout << "End Match by hash" << std::endl;
 
         return MatchedNodes;
     }

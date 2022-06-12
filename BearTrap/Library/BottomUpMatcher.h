@@ -69,9 +69,9 @@ public:
             default:
                 assert(false);
         };
-        std::cout << "INDEX: " << OriginalNode.index() << std::endl;
-        std::cout << "SIZE match: " << NodeChildMatch.size() << std::endl;
-        std::cout << "SIZE child: " << NodeCountDesc << std::endl;
+        // std::cout << "INDEX: " << OriginalNode.index() << std::endl;
+        // std::cout << "SIZE match: " << NodeChildMatch.size() << std::endl;
+        // std::cout << "SIZE child: " << NodeCountDesc << std::endl;
     }
 
     bool VisitDeclExec(Decl *decl);

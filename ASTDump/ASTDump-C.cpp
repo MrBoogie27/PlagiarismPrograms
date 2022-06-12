@@ -32,7 +32,7 @@ CXChildVisitResult visitor( CXCursor cursor, CXCursor /* parent */, CXClientData
   unsigned int curLevel  = *( reinterpret_cast<unsigned int*>( clientData ) );
   unsigned int nextLevel = curLevel + 1;
 
-  std::cout << std::string( curLevel, '-' ) << " " << getCursorKindName(
+  // std::cout << std::string( curLevel, '-' ) << " " << getCursorKindName(
   cursorKind ) << " (" << getCursorSpelling( cursor ) << ")\n";
 
   clang_visitChildren( cursor,
@@ -45,7 +45,7 @@ CXChildVisitResult visitor( CXCursor cursor, CXCursor /* parent */, CXClientData
 int main( int argc, char** argv )
 {
   if( argc < 2 ) {
-      std::cout << "no argument\n";
+      // std::cout << "no argument\n";
       return -1;
   }
 
@@ -53,7 +53,7 @@ int main( int argc, char** argv )
   CXTranslationUnit tu = clang_createTranslationUnit( index, argv[1] );
 
   if( !tu ) {
-      std::cout << "bad file" << std::endl;
+      // std::cout << "bad file" << std::endl;
       return -1;
   }
 

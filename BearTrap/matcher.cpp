@@ -26,12 +26,12 @@ int main(int argc, const char **argv) {
     ASTFrontendActionMatcher matcher(ASTs);
     auto matches = matcher.Match();
 
-    std::cout << "MATCH:\n";
-    std::cout << std::hex;
+    // std::cout << "MATCH:\n";
+    // std::cout << std::hex;
     for(auto& [left, right]: matches) {
-        std::cout << left << " : " << right << std::endl;
+        // std::cout << left << " : " << right << std::endl;
     }
-    std::cout << std::dec;
+    // std::cout << std::dec;
 
     auto attributes = matcher.GetASTAttribute();
     std::vector<PtrToUintMap> hashes = {attributes[0].Hashes, attributes[1].Hashes};
