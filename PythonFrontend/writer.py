@@ -1,4 +1,5 @@
 from common import compare_array
+from compare import run_bear_trap
 from prepare_hash import run_binary_hasher
 import psycopg2
 import tempfile
@@ -100,3 +101,47 @@ def writer_similarity(args):
                 compared = compare_array(row[2], row[3])
                 all_compares.append((row[0], row[1], compared))
             update_compared(cursor, all_compares)
+
+def get_bear_trap_similarity(row, binary_path, update_data):
+    with tempfile.NamedTemporaryFile(mode="w+t", suffix='.cpp') as first_file:
+        first_file.writelines(row[2])
+        first_file.seek(0)
+        with tempfile.NamedTemporaryFile(mode="w+t", suffix='.cpp') as second_file:
+            second_file.writelines(row[3])
+            second_file.seek(0)
+            try:
+                similarity = run_bear_trap(binary_path, first_file.name, second_file.name)
+                update_data.append(
+                    {
+                        'fst_id': row[0],
+                        'snd_id': row[1],
+                        'similarity': similarity
+                    }
+                )
+            except Exception as e:
+                print('error for {}'.format(row[0]))
+
+def update_bear_trap(cursor, update_data, args):
+    sql_command = open(args.sql_update, mode='r').read()
+    stmt = sql.SQL(sql_command).format(
+        sql.Identifier(args.field)
+    )
+    for sim_info in update_data:
+        cursor.execute(stmt, (sim_info['similarity'],
+                              sim_info['fst_id'],
+                              sim_info['snd_id'])
+                       )
+        print("updated {}".format(sim_info))
+
+def writer_bear_trap(args):
+    update_data = []
+    with get_connect(args) as conn:
+        with conn.cursor() as cursor:
+            sql_template = open(args.sql_get, mode='r').read()
+            stmt = sql.SQL(sql_template).format(
+                sql.Identifier(args.field)
+            )
+            cursor.execute(stmt)
+            for row in cursor:
+                get_bear_trap_similarity(row, args.binary_name, update_data)
+            update_bear_trap(cursor, update_data, args)

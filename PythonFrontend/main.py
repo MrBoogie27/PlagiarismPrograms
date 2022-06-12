@@ -2,7 +2,7 @@
 import argparse
 from prepare_hash import run_hasher
 from compare import compare_AST
-from writer import writer_hasher, writer_similarity
+from writer import writer_hasher, writer_similarity, writer_bear_trap
 
 
 if __name__ == '__main__':
@@ -35,6 +35,18 @@ if __name__ == '__main__':
     parser_writer_similarity.add_argument("--password", required=True)
     parser_writer_similarity.add_argument("--host", required=True)
     parser_writer_similarity.set_defaults(func=writer_similarity)
+
+    parser_writer_bear_trap = subparsers.add_parser("writer_bear_trap",
+                                                    help='write similarity programm to db by BearTrap program')
+    parser_writer_bear_trap.add_argument("-b", "--binary-name", default="./hasher_AST_tool")
+    parser_writer_bear_trap.add_argument("-db", "--database", required=True)
+    parser_writer_bear_trap.add_argument("-U", "--db-user", required=True)
+    parser_writer_bear_trap.add_argument("--password", required=True)
+    parser_writer_bear_trap.add_argument("--host", required=True)
+    parser_writer_bear_trap.add_argument("--field", required=True)
+    parser_writer_bear_trap.add_argument("--sql-get", required=True)
+    parser_writer_bear_trap.add_argument("--sql-update", required=True)
+    parser_writer_bear_trap.set_defaults(func=writer_bear_trap)
 
     args = parser.parse_args()
     args.func(args)
