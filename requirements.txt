@@ -1,5 +1,6 @@
-sudo apt-get install libclang-dev llvm clang clang-tools сmake           установка всех
-pip install psycopg2-binary                     postgre для python
-
+sudo apt-get install libclang-dev llvm clang clang-tools сmake        # установка всех
+pip install psycopg2-binary                   # postgre для python
+pip install PySimpleGUI                       # Для GUI статистики
+sudo apt-get install python3-tk
 use llvm-10
 
