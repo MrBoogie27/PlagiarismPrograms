@@ -1,5 +1,5 @@
 sudo apt-get install libclang-dev llvm clang clang-tools сmake        # установка c++ library
-pip install psycopg2-binary                       # postgre для python
-pip install PySimpleGUI pandas numpy matplotlib   # Для статистики
-sudo apt-get install python3-tk                   # Для статистики
+pip install psycopg2-binary                            # postgre для python
+pip install PySimpleGUI pandas numpy matplotlib scipy  # Для статистики
+sudo apt-get install python3-tk                        # Для статистики
 use llvm-10

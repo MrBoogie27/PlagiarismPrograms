@@ -89,7 +89,7 @@ def get_stats(args):
     all_metrics = get_all_metrics(args)
     fields = args.fields.split(',')
     print_table(all_metrics, fields)
-    print_graphs(all_metrics, fields + [args.manual_field])
+    print_graphs(all_metrics, fields)
 
 
 def print_table(all_metrics, fields):
@@ -100,6 +100,7 @@ def print_table(all_metrics, fields):
         'FN': 'False Negative',
         'TN': 'True Negative'
     }
+    euclidean_distances = {}
     for j in range(len(fields)):
         cnt = {
             'TP': 0,
@@ -107,9 +108,11 @@ def print_table(all_metrics, fields):
             'FN': 0,
             'TN': 0
         }
+        ed = 0
         for row in all_metrics:
             current = row[j]
             target = row[-1]
+            ed += (current - target) * (current - target)
             if current > THRESHOLD:
                 if target > THRESHOLD:
                     cnt['FP'] += 1
@@ -126,9 +129,11 @@ def print_table(all_metrics, fields):
             cnt[new_key] = cnt[key] * 100.0 / len(all_metrics)
             del cnt[key]
         data[fields[j]] = cnt
+        euclidean_distances[fields[j]] = round(ed / len(all_metrics), 3)
 
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(data).round(2)
     print(df)
+    print(euclidean_distances)
 
 
 def print_graphs(all_metrics, fields):
@@ -154,7 +159,7 @@ def print_histogram(all_metrics, fields):
             cnt[key] = cnt[key] * 100.0 / len(all_metrics)
         data[fields[j]] = cnt
 
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(data).round(2)
     print(df)
 
     x = range(len(fields))
@@ -182,11 +187,13 @@ def print_histogram(all_metrics, fields):
 def print_distribution(all_metrics, fields):
     np_metrics = np.array(all_metrics).transpose()
     np_metrics = np.multiply(np_metrics, 100.0)
-
-    plt.hist(list(np_metrics), histtype='step', bins=100, label=fields, density=True)
-    plt.ylabel("Percent")
+    # plt.hist(list(np_metrics)[:-1], histtype='step', bins=100, label=fields, density=True)
+    # plt.ylabel("Percent")
     plt.xlabel("Value")
-    plt.title('Гистограмма значений метрик')
-    plt.legend()
+    plt.title('Плотности распределений метрик')
 
+    for np_metrics_one in np_metrics[:-1]:
+        pd.Series(np_metrics_one).plot.kde()
+    plt.xlim(0, 100)
+    plt.legend(fields)
     plt.show()
