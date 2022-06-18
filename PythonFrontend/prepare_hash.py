@@ -9,8 +9,10 @@ def run_hasher(args):
 def run_binary_hasher(binary_name, file_name):
     result = subprocess.run([binary_name, file_name],
                             capture_output=True,
-                            check=True,
+                            check=False,
                             encoding='utf-8')
+    if not result:
+        raise Exception("Empty result")
     subtree_hashes = [int(subtree_hash) for subtree_hash in result.stdout.split('\n')[-2].split()]
     subtree_hashes.sort()
     return subtree_hashes

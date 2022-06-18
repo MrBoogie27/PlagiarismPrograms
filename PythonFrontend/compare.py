@@ -19,7 +19,7 @@ def run_compare(binary_name, first_file, second_file):
 def run_bear_trap(binary_name, file_name, second_file):
     result = subprocess.run([binary_name, file_name, second_file],
                             capture_output=True,
-                            check=True,
+                            check=False,
                             encoding='utf-8')
     answer = float(result.stdout.split()[1])
     return answer

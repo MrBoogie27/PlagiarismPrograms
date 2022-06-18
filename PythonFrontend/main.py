@@ -36,7 +36,8 @@ if __name__ == '__main__':
 
     parser_writer_hasher = subparsers.add_parser("writer_hashes",
                                                  help='write hashes to db',
-                                                 parents=[db_parser])
+                                                 parents=[db_parser, update_metric_parser])
+    parser_writer_hasher.add_argument("-b", "--binary-name", default="./hasher_AST_tool")
     parser_writer_hasher.set_defaults(func=writer_hasher)
 
     parser_writer_similarity = subparsers.add_parser("writer_similarity",

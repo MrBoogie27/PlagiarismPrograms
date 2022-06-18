@@ -65,8 +65,9 @@ class ASTConsumerCalcHashes : public clang::ASTConsumer {
 public:
     static std::map<std::string, PtrToUintMap> allHashes;
 public:
-    explicit ASTConsumerCalcHashes(ASTContext *Context)
-            : Visitor(Context) {}
+    explicit ASTConsumerCalcHashes(ASTContext *Context, bool needPrint = false)
+            : Visitor(Context)
+            , NeedPrint(needPrint) {}
 
     virtual void HandleTranslationUnit(clang::ASTContext &Context);
 
@@ -75,17 +76,15 @@ public:
     }
 private:
     VisitorCalcHashes Visitor;
+    bool NeedPrint;
 };
 
 class ASTFrontendCalcHashes : public ASTFrontendAction {
 public:
     virtual std::unique_ptr<ASTConsumer> CreateASTConsumer(
             CompilerInstance &Compiler, llvm::StringRef InFile) {
-        return std::make_unique<ASTConsumerCalcHashes>(&Compiler.getASTContext());
+        return std::make_unique<ASTConsumerCalcHashes>(&Compiler.getASTContext(), true);
     }
-
-private:
-    std::map<llvm::StringRef, std::unique_ptr<ASTConsumer>> Consumers;
 };
 
 #endif //PLAGIARISMPROGRAMS_CALCHASHES_H

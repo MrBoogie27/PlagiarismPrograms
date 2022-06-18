@@ -143,10 +143,10 @@ bool VisitorCalcHashes::VisitCXXRecordDecl(CXXRecordDecl *Declaration) {
 void ASTConsumerCalcHashes::HandleTranslationUnit(clang::ASTContext &Context) {
     Visitor.TraverseDecl(Context.getTranslationUnitDecl());
 
-//    Context.getTranslationUnitDecl()->dump();
-//    llvm::outs().flush();
-    for (auto& [key, value]: Visitor.GetHashes()) {
-        // std::cout << std::hex << key << " " << std::dec << value << "\n";
+    if (NeedPrint) {
+        for (auto &[_, value]: Visitor.GetHashes()) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
     }
-    // std::cout.flush();
 }
