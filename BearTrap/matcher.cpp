@@ -16,6 +16,10 @@ static llvm::cl::OptionCategory MyToolCategory("Additional options");
 
 int main(int argc, const char **argv) {
     CommonOptionsParser OptionsParser(argc, argv, MyToolCategory);
+    if (OptionsParser.getSourcePathList().size() != 2) {
+        std::cerr << "Should be exactly 2 file" << std::endl;
+        return 1;
+    }
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
 

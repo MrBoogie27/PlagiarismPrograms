@@ -56,7 +56,7 @@ if __name__ == '__main__':
     parser_writer_bear_trap = subparsers.add_parser("writer_bear_trap",
                                                     help='write similarity programm to db by BearTrap program',
                                                     parents=[db_parser, update_metric_parser])
-    parser_writer_bear_trap.add_argument("-b", "--binary-name", default="./hasher_AST_tool")
+    parser_writer_bear_trap.add_argument("-b", "--binary-name", default="./bearTrap")
     parser_writer_bear_trap.set_defaults(func=writer_bear_trap)
 
     parser_writer_simian = subparsers.add_parser("writer_simian",

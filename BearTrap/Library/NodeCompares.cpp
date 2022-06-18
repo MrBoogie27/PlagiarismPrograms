@@ -14,23 +14,67 @@ namespace BearTrap {
     }
 
     double Compare(Decl *first, Decl *second) {
+#define COMPAREDECL(CLASS)                                 \
+  case Decl::CLASS:                                        \
+        return Compare(static_cast<CLASS##Decl *>(first), static_cast<CLASS##Decl *>(second));
+
         switch (first->getKind()) {
-            case Decl::Var:
-                return Compare(static_cast<VarDecl *>(first), static_cast<VarDecl *>(second));
-            case Decl::Function:
-                return Compare(static_cast<FunctionDecl *>(first), static_cast<FunctionDecl *>(second));
-            case Decl::CXXRecord:
-                return Compare(static_cast<CXXRecordDecl *>(first), static_cast<CXXRecordDecl *>(second));
+            COMPAREDECL(Var)
+            COMPAREDECL(Function)
+            COMPAREDECL(CXXRecord)
             default:
                 return 1.0;
         }
+#undef COMPAREDECL
     }
 
     double Compare(Stmt *first, Stmt *second) {
-        return 1.0;
+#define COMPARESTMT(CLASS)                                 \
+  case Stmt::CLASS##Class:                                        \
+        return Compare(static_cast<CLASS *>(first), static_cast<CLASS *>(second));
+        switch (first->getStmtClass()) {
+            COMPARESTMT(IntegerLiteral)
+            COMPARESTMT(UnaryOperator)
+            COMPARESTMT(CXXConstructExpr)
+            COMPARESTMT(CallExpr)
+            COMPARESTMT(WhileStmt)
+            COMPARESTMT(ForStmt)
+            COMPARESTMT(IfStmt)
+            default:
+                return 1.0;
+        }
+#undef COMPARESTMT
     }
 
     double Compare(CXXRecordDecl *first, CXXRecordDecl *second) {
+        return 1.0;
+    }
+
+    double Compare(IntegerLiteral *first, IntegerLiteral *second) {
+        return 1.0;
+    }
+
+    double Compare(UnaryOperator *first, UnaryOperator *second) {
+        return 1.0;
+    }
+
+    double Compare(CXXConstructExpr *first, CXXConstructExpr *second) {
+        return 1.0;
+    }
+
+    double Compare(CallExpr *first, CallExpr *second) {
+        return 1.0;
+    }
+
+    double Compare(WhileStmt *first, WhileStmt *second) {
+        return 1.0;
+    }
+
+    double Compare(ForStmt *first, ForStmt *second) {
+        return 1.0;
+    }
+
+    double Compare(IfStmt *first, IfStmt *second) {
         return 1.0;
     }
 }
