@@ -13,9 +13,11 @@ COLUMNS_MATCH=('first_runs_id', 'second_runs_id', 'match_AST_v1')
 PROBLEM_ID=3
 COUNT_LIMIT = 100
 
+
 def get_connect(args):
     return psycopg2.connect(dbname=args.database, user=args.db_user,
                             password=args.password, host=args.host)
+
 
 def insert_hash(row, update_data):
     with tempfile.NamedTemporaryFile(mode="w+t", suffix='.cpp') as fp:
@@ -26,6 +28,7 @@ def insert_hash(row, update_data):
             update_data[row[0]] = hashes
         except Exception as e:
             print('error for {}'.format(row[0]))
+
 
 def all_update(cursor, update_data):
     sql_command = """UPDATE {}
@@ -41,6 +44,7 @@ def all_update(cursor, update_data):
         cursor.execute(stmt, (hashes, key))
         print("updated {}".format(key))
 
+
 def writer_hasher(args):
     update_data = {}
     with get_connect(args) as conn:
@@ -55,6 +59,7 @@ def writer_hasher(args):
                     insert_hash(row, update_data)
             all_update(cursor, update_data)
 
+
 def update_compared(cursor, all_compares):
     sql_command = """UPDATE {}
                    SET {} = %s
@@ -68,6 +73,7 @@ def update_compared(cursor, all_compares):
     for fst_key, snd_key, comparison in all_compares:
         cursor.execute(stmt, (comparison, fst_key, snd_key))
         print("updated comparison for {} and {}".format(fst_key, snd_key))
+
 
 def writer_similarity(args):
     RUN_TABLE = 'runs'
@@ -142,6 +148,7 @@ def update_data_func(cursor, update_data, args):
                               sim_info['fst_id'],
                               sim_info['snd_id'])
                        )
+
 
 def writer_bear_trap(args):
     update_data = []

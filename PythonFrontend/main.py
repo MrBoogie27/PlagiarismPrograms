@@ -3,7 +3,7 @@ import argparse
 from prepare_hash import run_hasher
 from compare import compare_AST
 from writer import writer_hasher, writer_similarity, writer_bear_trap, writer_simian
-from stats import update_manual
+from stats import update_manual, get_stats
 
 
 if __name__ == '__main__':
@@ -63,6 +63,14 @@ if __name__ == '__main__':
     parser_update_manual.add_argument("--sql-update", required=True)
     parser_update_manual.add_argument("--manual-field", default="manual_check")
     parser_update_manual.set_defaults(func=update_manual)
+
+    parser_get_stats = subparsers.add_parser("get_stats",
+                                             help='get metrics and graphs, where fields its common separated fields',
+                                             parents=[db_parser])
+    parser_get_stats.add_argument("--sql-get", required=True)
+    parser_get_stats.add_argument("--fields", required=True)
+    parser_get_stats.add_argument("--manual-field", default="manual_check")
+    parser_get_stats.set_defaults(func=get_stats)
 
     args = parser.parse_args()
     args.func(args)
