@@ -1,5 +1,5 @@
 from common import compare_array
-from compare import run_bear_trap
+from compare import run_bear_trap, run_simian
 from prepare_hash import run_binary_hasher
 import psycopg2
 import tempfile
@@ -102,7 +102,8 @@ def writer_similarity(args):
                 all_compares.append((row[0], row[1], compared))
             update_compared(cursor, all_compares)
 
-def get_bear_trap_similarity(row, binary_path, update_data):
+
+def get_similarity(row, binary_path, update_data, method):
     with tempfile.NamedTemporaryFile(mode="w+t", suffix='.cpp') as first_file:
         first_file.writelines(row[2])
         first_file.seek(0)
@@ -110,7 +111,7 @@ def get_bear_trap_similarity(row, binary_path, update_data):
             second_file.writelines(row[3])
             second_file.seek(0)
             try:
-                similarity = run_bear_trap(binary_path, first_file.name, second_file.name)
+                similarity = method(binary_path, first_file.name, second_file.name)
                 update_data.append(
                     {
                         'fst_id': row[0],
@@ -122,7 +123,16 @@ def get_bear_trap_similarity(row, binary_path, update_data):
                 print(e)
                 print('error for {}'.format(row[0], row[1]))
 
-def update_bear_trap(cursor, update_data, args):
+
+def get_bear_trap_similarity(row, binary_path, update_data):
+    get_similarity(row, binary_path, update_data, run_bear_trap)
+
+
+def get_simian_similarity(row, jar_name, update_data):
+    get_similarity(row, jar_name, update_data, run_simian)
+
+
+def update_data_func(cursor, update_data, args):
     sql_command = open(args.sql_update, mode='r').read()
     stmt = sql.SQL(sql_command).format(
         sql.Identifier(args.field)
@@ -132,7 +142,6 @@ def update_bear_trap(cursor, update_data, args):
                               sim_info['fst_id'],
                               sim_info['snd_id'])
                        )
-        # print("updated {}".format(sim_info))
 
 def writer_bear_trap(args):
     update_data = []
@@ -150,6 +159,23 @@ def writer_bear_trap(args):
                 print("Run iteration number {} for {} rows".format(i, cursor.rowcount))
                 for row in cursor:
                     get_bear_trap_similarity(row, args.binary_name, update_data)
-                update_bear_trap(cursor, update_data, args)
+                update_data_func(cursor, update_data, args)
                 print("Rows updated")
                 i += 1
+
+
+def writer_simian(args):
+    update_data = []
+    with get_connect(args) as conn:
+        with conn.cursor() as cursor:
+            sql_template = open(args.sql_get, mode='r').read()
+            stmt = sql.SQL(sql_template).format(
+                sql.Identifier(args.field)
+            )
+
+            cursor.execute(stmt)
+            for row in cursor:
+                get_simian_similarity(row, args.jar_name, update_data)
+            print(update_data)
+            update_data_func(cursor, update_data, args)
+            print("Rows updated")
