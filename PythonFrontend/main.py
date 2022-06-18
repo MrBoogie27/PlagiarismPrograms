@@ -2,16 +2,16 @@
 import argparse
 from prepare_hash import run_hasher
 from compare import compare_AST
-from writer import writer_hasher, writer_similarity, writer_bear_trap, writer_simian
+from writer import writer_hasher, writer_similarity_v1, writer_similarity_v3, writer_bear_trap, writer_simian
 from stats import update_manual, get_stats
 
 
 if __name__ == '__main__':
     db_parser = argparse.ArgumentParser(description="Database options", add_help=False)
-    db_parser.add_argument("-db", "--database", required=True)
-    db_parser.add_argument("-U", "--db-user", required=True)
-    db_parser.add_argument("--password", required=True)
-    db_parser.add_argument("--host", required=True)
+    db_parser.add_argument("-db", "--database", default="BearTrapDb")
+    db_parser.add_argument("-U", "--db-user", default="postgres")
+    db_parser.add_argument("--password", default="postgres")
+    db_parser.add_argument("--host", default="localhost")
 
     update_metric_parser = argparse.ArgumentParser(description="Update metric options", add_help=False)
     update_metric_parser.add_argument("--field", required=True)
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     parser_hasher.add_argument("-b", "--binary-name", default="./hasher_AST_tool")
     parser_hasher.set_defaults(func=run_hasher)
 
-    parser_compare = subparsers.add_parser("compare2AST", help='compare 2 AST')
+    parser_compare = subparsers.add_parser("compare2AST_hash", help='compare 2 AST by hash')
     parser_compare.add_argument("-f", "--first-file", required=True)
     parser_compare.add_argument("-s", "--second-file", required=True)
     parser_compare.add_argument("-b", "--binary-name", default="./hasher_AST_tool")
@@ -40,10 +40,18 @@ if __name__ == '__main__':
     parser_writer_hasher.add_argument("-b", "--binary-name", default="./hasher_AST_tool")
     parser_writer_hasher.set_defaults(func=writer_hasher)
 
-    parser_writer_similarity = subparsers.add_parser("writer_similarity",
-                                                     help='write similarity files to db',
-                                                     parents=[db_parser])
-    parser_writer_similarity.set_defaults(func=writer_similarity)
+    parser_writer_similarity_v1 = subparsers.add_parser("writer_similarity_v1",
+                                                        help='write similarity files to db',
+                                                        parents=[db_parser, update_metric_parser])
+    parser_writer_similarity_v1.add_argument("--field-hash", default="hashes")
+    parser_writer_similarity_v1.set_defaults(func=writer_similarity_v1)
+
+    parser_writer_similarity_v3 = subparsers.add_parser("writer_similarity_v3",
+                                                        help='write similarity files to db',
+                                                        parents=[db_parser, update_metric_parser])
+    parser_writer_similarity_v3.add_argument("--field-hash", default="hashes")
+    parser_writer_similarity_v3.add_argument("--field-prematch", default="match_score")
+    parser_writer_similarity_v3.set_defaults(func=writer_similarity_v3)
 
     parser_writer_bear_trap = subparsers.add_parser("writer_bear_trap",
                                                     help='write similarity programm to db by BearTrap program',
@@ -52,8 +60,8 @@ if __name__ == '__main__':
     parser_writer_bear_trap.set_defaults(func=writer_bear_trap)
 
     parser_writer_simian = subparsers.add_parser("writer_simian",
-                                                    help='write similarity programm to db by simian program',
-                                                    parents=[db_parser, update_metric_parser])
+                                                 help='write similarity programm to db by simian program',
+                                                 parents=[db_parser, update_metric_parser])
     parser_writer_simian.add_argument("--jar-name", required=True)
     parser_writer_simian.set_defaults(func=writer_simian)
 

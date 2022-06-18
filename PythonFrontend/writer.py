@@ -1,5 +1,5 @@
 from common import compare_array
-from compare import run_bear_trap, run_simian
+from compare import run_bear_trap, get_combine_sim, run_simian
 from prepare_hash import run_binary_hasher
 import psycopg2
 import tempfile
@@ -45,53 +45,55 @@ def writer_hasher(args):
             update_hashes(cursor, update_data, args)
 
 
-def update_compared(cursor, all_compares):
-    sql_command = """UPDATE {}
-                   SET {} = %s
-                   WHERE {} = %s and {} = %s"""
-    stmt = sql.SQL(sql_command).format(
-        sql.Identifier(TABLE_TEXT_MATCHES),
-        sql.Identifier(COLUMNS_MATCH[2]),
-        sql.Identifier(COLUMNS_MATCH[0]),
-        sql.Identifier(COLUMNS_MATCH[1])
-    )
-    for fst_key, snd_key, comparison in all_compares:
-        cursor.execute(stmt, (comparison, fst_key, snd_key))
-        print("updated comparison for {} and {}".format(fst_key, snd_key))
-
-
-def writer_similarity(args):
-    RUN_TABLE = 'runs'
+def writer_similarity_v1(args):
     with get_connect(args) as conn:
         with conn.cursor() as cursor:
-            stmt = sql.SQL("""SELECT first_runs_id,
-                                     second_runs_id,
-                                     fst_run."ASTHash" as fst_hash,
-                                     snd_run."ASTHash" as snd_hash
-                              FROM
-                                {}
-                                JOIN {} as fst_run
-                                ON {}.first_runs_id = fst_run.id
-                                JOIN {} as snd_run
-                                ON {}.second_runs_id = snd_run.id
-                              WHERE {}.problems_id = %s
-                                    and "match_AST_v1" IS NULL
-                                    and fst_run."ASTHash" IS NOT NULL
-                                    and snd_run."ASTHash" IS NOT NULL
-                              LIMIT %s""").format(
-                sql.Identifier(TABLE_TEXT_MATCHES),
-                sql.Identifier(RUN_TABLE),
-                sql.Identifier(TABLE_TEXT_MATCHES),
-                sql.Identifier(RUN_TABLE),
-                sql.Identifier(TABLE_TEXT_MATCHES),
-                sql.Identifier(TABLE_TEXT_MATCHES)
+            sql_command = open(args.sql_get, mode='r').read()
+            stmt = sql.SQL(sql_command).format(
+                sql.Identifier(args.field_hash),
+                sql.Identifier(args.field_hash),
+                sql.Identifier(args.field_hash),
+                sql.Identifier(args.field_hash),
+                sql.Identifier(args.field)
             )
-            cursor.execute(stmt, (PROBLEM_ID, COUNT_LIMIT))
+            cursor.execute(stmt)
             all_compares = []
             for row in cursor:
-                compared = compare_array(row[2], row[3])
-                all_compares.append((row[0], row[1], compared))
-            update_compared(cursor, all_compares)
+                if not row[2] or not row[3]:
+                    continue
+                similarity = compare_array(row[2], row[3])
+                all_compares.append({
+                    'fst_id': row[0],
+                    'snd_id': row[1],
+                    'similarity': similarity
+                })
+            update_data_func(cursor, all_compares, args)
+
+
+def writer_similarity_v3(args):
+    with get_connect(args) as conn:
+        with conn.cursor() as cursor:
+            sql_command = open(args.sql_get, mode='r').read()
+            stmt = sql.SQL(sql_command).format(
+                sql.Identifier(args.field_hash),
+                sql.Identifier(args.field_hash),
+                sql.Identifier(args.field_prematch),
+                sql.Identifier(args.field_hash),
+                sql.Identifier(args.field_hash),
+                sql.Identifier(args.field)
+            )
+            cursor.execute(stmt)
+            all_compares = []
+            for row in cursor:
+                if not row[2] or not row[3]:
+                    continue
+                similarity = get_combine_sim(row[2], row[3], row[4])
+                all_compares.append({
+                    'fst_id': row[0],
+                    'snd_id': row[1],
+                    'similarity': similarity
+                })
+            update_data_func(cursor, all_compares, args)
 
 
 def get_similarity(row, binary_path, update_data, method):
@@ -133,6 +135,7 @@ def update_data_func(cursor, update_data, args):
                               sim_info['fst_id'],
                               sim_info['snd_id'])
                        )
+    print("Updated {} rows".format(len(update_data)))
 
 
 def writer_bear_trap(args):

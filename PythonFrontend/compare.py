@@ -1,8 +1,10 @@
 import re
 import subprocess
-
 from prepare_hash import run_binary_hasher
 from common import compare_array
+
+COEF1 = 2
+COEF2 = 3
 
 
 def compare_AST(args):
@@ -14,6 +16,15 @@ def run_compare(binary_name, first_file, second_file):
     result_first = run_binary_hasher(binary_name, first_file)
     result_second = run_binary_hasher(binary_name, second_file)
     return compare_array(result_first, result_second)
+
+
+def get_combine_sim(first_hashes, second_hashes, levenshtein):
+    # If mini program hashes very high, if big program levenshtein very low, so weighing result
+    hash_similarity = compare_array(first_hashes, second_hashes)
+    max_sim = max(hash_similarity, levenshtein)
+    min_sim = min(hash_similarity, levenshtein)
+    similarity = (COEF1 * max_sim + COEF2 * min_sim) / (COEF1 + COEF2)
+    return similarity
 
 
 def run_bear_trap(binary_name, file_name, second_file):
